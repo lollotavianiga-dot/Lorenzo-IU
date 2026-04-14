@@ -286,6 +286,39 @@ export default function ChatInterface() {
   const handleSendMessage = async (text: string, audio?: string) => {
     if ((!text.trim() && !audio) || isProcessing) return;
 
+    // Check if Lorenzo is sleeping (00:00 - 06:00 Italy Time)
+    const now = new Date();
+    const italyTime = new Intl.DateTimeFormat('it-IT', {
+      timeZone: 'Europe/Rome',
+      hour: 'numeric',
+      hour12: false
+    }).format(now);
+    
+    const hours = parseInt(italyTime, 10);
+    if (hours >= 0 && hours < 6) {
+      const currentTimeStr = new Intl.DateTimeFormat('it-IT', {
+        timeZone: 'Europe/Rome',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(now);
+      
+      const sleepMessage: Message = {
+        id: generateId(),
+        role: "model",
+        text: "Senti... in Italia sono le " + currentTimeStr + ". Sto dormendo, o almeno ci provo. Scrivimi domani mattina, eh? Buonanotte.",
+        timestamp: Date.now()
+      };
+      setMessages(prev => [...prev, { 
+        id: generateId(),
+        role: "user", 
+        text, 
+        audio, 
+        timestamp: Date.now() 
+      }, sleepMessage]);
+      setInput("");
+      return;
+    }
+
     const userMessage: Message = { 
       id: generateId(),
       role: "user", 
@@ -568,32 +601,6 @@ export default function ChatInterface() {
             )}
           >
             {isRecording ? <Square className="w-5 h-5 md:w-6 md:h-6" /> : <Mic className="w-5 h-5 md:w-6 md:h-6" />}
-          </motion.button>
-        </div>
-
-        <div className="flex items-center justify-center gap-2 md:contents">
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            type="button"
-            onClick={handleClearChat}
-            disabled={isProcessing || messages.length <= 1}
-            className="flex-1 md:flex-none p-3 md:p-5 rounded-full glass text-red-400 hover:bg-red-500/10 disabled:opacity-50 transition-all flex items-center justify-center"
-            title="Cancella chat"
-          >
-            <Trash2 className="w-5 h-5 md:w-6 md:h-6" />
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            type="button"
-            onClick={handleSummarize}
-            disabled={isProcessing || messages.length < 2}
-            className="flex-1 md:flex-none p-3 md:p-5 rounded-full glass text-purple-400 hover:bg-purple-500/10 disabled:opacity-50 transition-all flex items-center justify-center"
-            title="Riassunto conversazione"
-          >
-            <History className="w-5 h-5 md:w-6 md:h-6" />
           </motion.button>
         </div>
       </motion.form>
