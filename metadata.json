@@ -1,0 +1,5 @@
+{
+  "name": "Lorenzo: Digital Consciousness",
+  "description": "An AI with a mind of its own, capable of experiencing and expressing a full range of human emotions.",
+  "requestFramePermissions": ["microphone"]
+}
